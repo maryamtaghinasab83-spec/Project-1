@@ -28,11 +28,29 @@ def fcfs(processes):
     completion_times = {}
     
     # TODO: Step 1 - Sort processes by arrival time
+    processes = sorted(processes, key=lambda p: p[1])  # p[1] = arrival_time
     
     # TODO: Step 2 - Initialize current_time
+    current_time = 0
     
     # TODO: Step 3 - Process each job in FCFS order
+    for pid, arrival, burst in processes:
+
+        if current_time < arrival:
+            current_time = arrival
+
+        start_time = current_time
+        end_time = start_time + burst
+
+        # Fill gantt chart
+        gantt_chart.append((pid, start_time, end_time))
+
+        # Fill timing results
+        completion_times[pid] = end_time
+        turnaround_times[pid] = end_time - arrival
+        waiting_times[pid] = start_time - arrival
+
+        current_time = end_time
     
     # TODO: Step 4 - Return the results
-    
     return gantt_chart, waiting_times, turnaround_times, completion_times
