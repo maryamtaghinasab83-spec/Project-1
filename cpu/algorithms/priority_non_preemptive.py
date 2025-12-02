@@ -1,6 +1,6 @@
 def priority_non_preemptive(processes, priorities):
     """
-    TODO: Implement Priority Non-Preemptive CPU scheduling algorithm
+    Implement Priority Non-Preemptive CPU scheduling algorithm
     
     Priority Non-Preemptive is a scheduling algorithm where processes are executed 
     based on their priority (higher priority first) without preemption.
@@ -21,20 +21,71 @@ def priority_non_preemptive(processes, priorities):
         - completion_times: Dictionary {pid: completion_time}
     """
     
-    # TODO:
-    # Currently returning empty data - replace with your implementation
+    if not processes:
+        return [], {}, {}, {}
     
+    # Step 1 - Sort processes by arrival time initially
+    processes = sorted(processes, key=lambda p: p[1])
+    
+    # Step 2 - Initialize variables
     gantt_chart = []
     waiting_times = {}
     turnaround_times = {}
     completion_times = {}
     
-    # TODO: Step 1 - Sort processes by arrival time
+    current_time = 0
+    completed = 0
+    n = len(processes)
     
-    # TODO: Step 2 - Initialize current_time and remaining processes list
+    # Track remaining processes
+    remaining_processes = []
+    for pid, arrival, burst in processes:
+        remaining_processes.append({
+            'pid': pid,
+            'arrival': arrival,
+            'burst': burst,
+            'priority': priorities.get(pid, 0),
+            'completed': False
+        })
     
-    # TODO: Step 3 - Process scheduling loop
+    # Step 3 - Process scheduling loop
+    while completed < n:
+        # Find available processes
+        available = [p for p in remaining_processes 
+                    if not p['completed'] and p['arrival'] <= current_time]
+        
+        # If no process available, jump to next arrival
+        if not available:
+            next_arrival = min([p['arrival'] for p in remaining_processes 
+                              if not p['completed']])
+            current_time = next_arrival
+            continue
+        
+        # Select process with highest priority (higher number = higher priority)
+        # For tie-breaking: higher priority first, then earlier arrival
+        selected = max(available, key=lambda p: (p['priority'], -p['arrival']))
+        
+        # Execute selected process
+        start_time = current_time
+        end_time = start_time + selected['burst']
+        
+        # Add to Gantt chart
+        gantt_chart.append((selected['pid'], start_time, end_time))
+        
+        # Calculate metrics
+        completion_time = end_time
+        turnaround_time = completion_time - selected['arrival']
+        waiting_time = turnaround_time - selected['burst']
+        
+        # Store results
+        completion_times[selected['pid']] = completion_time
+        turnaround_times[selected['pid']] = turnaround_time
+        waiting_times[selected['pid']] = waiting_time
+        
+        # Update state
+        current_time = end_time
+        selected['completed'] = True
+        completed += 1
     
-    # TODO: Step 4 - Return the results
-    
+    # Step 4 - Return results
     return gantt_chart, waiting_times, turnaround_times, completion_times
